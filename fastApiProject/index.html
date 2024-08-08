@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Caption Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #000000; /* Black background */
+            color: #ffffff; /* White text */
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            margin-top: 50px;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #333333; /* Dark grey container background */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input[type="file"] {
+            display: none;
+        }
+        label {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        label:hover {
+            background-color: #45a049;
+        }
+        .img-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            display: none; /* initially hidden */
+        }
+        .caption {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #ffffff; /* White text for caption */
+            white-space: pre-line; /* Preserve line breaks in the caption */
+        }
+        button {
+            background-color: #008CBA;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #005f6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Image Caption Generator</h1>
+        <form id="upload-form">
+            <label for="file-upload">Choose an image</label>
+            <input id="file-upload" type="file" accept="image/*">
+        </form>
+        <div class="img-container">
+            <img id="image-preview" src="#" alt="Image Preview"/>
+        </div>
+        <button id="generate-btn">Generate Caption</button>
+        <div class="caption" id="caption"></div>
+    </div>
+
+    <script>
+        document.getElementById('file-upload').onchange = function(event) {
+            var file = event.target.files[0];
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var imgElement = document.getElementById('image-preview');
+                imgElement.src = e.target.result;
+                imgElement.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        };
+
+        document.getElementById('generate-btn').onclick = function() {
+            var fileInput = document.getElementById('file-upload');
+            var file = fileInput.files[0];
+
+            if (!file) {
+                alert("Please choose an image.");
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append("file", file);
+
+            fetch('http://127.0.0.1:8000/caption/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('caption').innerText = "Caption: " + data.caption;  ;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while generating the caption.');
+            });
+        };
+    </script>
+</body>
+</html>
